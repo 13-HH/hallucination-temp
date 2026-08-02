@@ -2,7 +2,7 @@ import { LLMProvider } from "./LLMProvider";
 
 /**
  * Talks to a locally running Ollama instance (https://ollama.com).
- * No API key needed — Ollama runs on your own machine and serves
+ * No API key needed since  Ollama runs on your own machine and serves
  * open-source models like llama3, mistral, phi3, etc.
  *
  * Requires `ollama serve` to be running locally, and the model to
@@ -23,6 +23,7 @@ export class OllamaProvider implements LLMProvider {
                 system: systemPrompt,
                 prompt: userPrompt,
                 stream: false,
+                format: "json",
             }),
         });
 
