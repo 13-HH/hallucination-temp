@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<!--
+  ⚠️ DUMMY REFERENCE FILE — NOT THE REAL DESIGN ⚠️
+
+     Feel free to throw out every line of HTML/CSS here.
+
+  The only things that matter for the real frontend:
+    1. GET  /api/statement          -> { sessionId, statement: { topic, difficulty, text } }
+    2. POST /api/answer  { sessionId, guess: true/false }
+       -> { correct, actualAnswer, explanation, pointsAwarded, totalScore }
+
+  As long as your real frontend calls those two endpoints the same way
+  the JS below does, it'll work with the existing backend untouched.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Dummy</title>
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    max-width: 600px;
+    margin: 60px auto;
+    padding: 0 20px;
+    color: #222;
+  }
+  #statement-text {
+    font-size: 1.3rem;
+    margin: 24px 0;
+  }
+  button {
+    font-size: 1rem;
+    padding: 10px 20px;
+    margin-right: 8px;
+    cursor: pointer;
+  }
+  #result {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 8px;
+  }
+  #result.correct { background: #e6f7e9; }
+  #result.wrong { background: #fdeaea; }
+  #score { margin-top: 30px; color: #555; }
+</style>
+</head>
+<body>
+
+  <h1>Hallucination Detective</h1>
+  <p>[<span id="meta">loading...</span>]</p>
+  <p id="statement-text">Loading a statement...</p>
+
+  <div id="answer-buttons">
+    <button id="btn-true">True</button>
+    <button id="btn-false">False</button>
+  </div>
+
+  <div id="result" style="display: none;"></div>
+
+  <p id="score">Score: 0</p>
+  <button id="btn-next" style="display: none;">Next statement</button>
+
+<script>
+  let sessionId = null;
+  const playerId = crypto.randomUUID();
+  let totalScore = 0;
+
+  async function loadStatement() {
+    document.getElementById("result").style.display = "none";
+    document.getElementById("answer-buttons").style.display = "block";
+    document.getElementById("btn-next").style.display = "none";
+    document.getElementById("statement-text").textContent = "Loading a statement...";
+
+    try {
+      const res = await fetch("/api/statement?topic=History&difficulty=Medium");
+
+      if (!res.ok) {
+        throw new Error("Server returned an error");
+      }
+
+      const data = await res.json();
+      sessionId = data.sessionId;
+      document.getElementById("meta").textContent = `${data.statement.topic} — ${data.statement.difficulty}`;
+      document.getElementById("statement-text").textContent = data.statement.text;
+    } 
+    catch (err) {
+      //When gemini gives a 503 error
+      document.getElementById("statement-text").textContent = "Couldn't load a statement - the AI service may be busy. Try again.";
+      document.getElementById("answer-buttons").style.display = "none";
+      document.getElementById("btn-next").style.display = "inline-block";
+      document.getElementById("btn-next").textContent = "Try again";
+    }
+  }
+
+  async function submitAnswer(guess) {
+    // send sessionId + playerId + the player's guess. The server (not this file) decides right/wrong and updates score.
+    const res = await fetch("/api/answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId, playerId, guess }),
+    });
+    const result = await res.json();
+
+    totalScore = result.totalScore;
+
+    const resultBox = document.getElementById("result");
+    resultBox.style.display = "block";
+    resultBox.className = result.correct ? "correct" : "wrong";
+    resultBox.innerHTML = `
+      <strong>${result.correct ? "✓ Correct!" : "✘ Not quite."}</strong><br>
+      The statement was actually <strong>${result.actualAnswer ? "TRUE" : "FALSE"}</strong>.<br>
+      ${result.explanation}
+    `;
+
+    document.getElementById("answer-buttons").style.display = "none";
+    document.getElementById("btn-next").style.display = "inline-block";
+    document.getElementById("btn-next").textContent = "Next statement";
+    document.getElementById("score").textContent = `Score: ${totalScore}`;
+  }
+
+  document.getElementById("btn-true").onclick = () => submitAnswer(true);
+  document.getElementById("btn-false").onclick = () => submitAnswer(false);
+  document.getElementById("btn-next").onclick = loadStatement;
+
+  loadStatement();
+</script>
+
+</body>
+</html>
