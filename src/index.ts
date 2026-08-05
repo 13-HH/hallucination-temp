@@ -2,13 +2,14 @@ import "dotenv/config";
 import * as readline from "node:readline/promises";
 import { OllamaProvider } from "./llm/ollama";
 import { GeminiProvider } from "./llm/gemini";
+import { GroqProvider } from "./llm/groq";
 import { StatementGenerator } from "./services/StatementGenerator";
 import { GameSession } from "./services/GameLogic";
 
 async function main() {
-    const llm = new GeminiProvider(
-        process.env.GEMINI_API_KEY!,
-        process.env.GEMINI_MODEL
+    const llm = new GroqProvider(
+        process.env.GROQ_API_KEY!,
+        process.env.GROQ_MODEL
     );
     const generator = new StatementGenerator(llm);
 
