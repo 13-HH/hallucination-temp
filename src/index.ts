@@ -1,13 +1,13 @@
 import "dotenv/config";
 import * as readline from "node:readline/promises";
-import { OllamaProvider } from "./llm/ollama";
-import { GeminiProvider } from "./llm/gemini";
-import { GroqProvider } from "./llm/groq";
+import { Ollama } from "./llm/ollama";
+import { Gemini } from "./llm/gemini";
+import { Groq } from "./llm/groq";
 import { StatementGenerator } from "./services/StatementGenerator";
 import { GameSession } from "./services/GameLogic";
 
 async function main() {
-    const llm = new GroqProvider(
+    const llm = new Groq(
         process.env.GROQ_API_KEY!,
         process.env.GROQ_MODEL
     );

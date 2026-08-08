@@ -2,8 +2,8 @@ import "dotenv/config";
 import express from "express";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { GeminiProvider } from "./llm/gemini";
-import { GroqProvider } from "./llm/groq";
+import { Gemini } from "./llm/gemini";
+import { Groq } from "./llm/groq";
 import { StatementGenerator } from "./services/StatementGenerator";
 import { GameSession } from "./services/GameLogic";
 
@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
-const llm = new GroqProvider(process.env.GROQ_API_KEY!, process.env.GROQ_MODEL);
+const llm = new Groq(process.env.GROQ_API_KEY!, process.env.GROQ_MODEL);
 const generator = new StatementGenerator(llm);
 
 //sessionId
