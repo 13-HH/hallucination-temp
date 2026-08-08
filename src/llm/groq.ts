@@ -1,7 +1,7 @@
-import { LLMProvider } from "./LLMProvider";
+import { LLMSelect } from "./LLMSelect";
 
 
-export class GroqProvider implements LLMProvider {
+export class Groq implements LLMSelect {
     constructor(
         private apiKey: string,
         private model = "llama-3.3-70b-versatile",
